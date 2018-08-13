@@ -114,5 +114,7 @@ trait HasPoints
         }
 
         $this->points()->save($point);
+
+        return $point;
     }
 }
