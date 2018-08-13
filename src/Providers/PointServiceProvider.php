@@ -31,6 +31,6 @@ class PointServiceProvider extends ServiceProvider
     {
         $this->publishes([
             __DIR__.'/../../resources/database/migrations' => database_path('migrations'),
-        ], 'taxonomies-migrations');
+        ], 'points-migrations');
     }
 }
