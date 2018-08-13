@@ -1,0 +1,28 @@
+{
+    "name": "webbingbrasil/laravel-points",
+    "description": "A basic points implementation for gamification system in laravel.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Danilo Andrade",
+            "email": "mandrade.danilo@gmail.com"
+        }
+    ],
+    "require": {
+        "php"                 : ">=5.6.4|^7.0",
+        "illuminate/support"  : ">=5.3",
+        "illuminate/database" : ">=5.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "WebbingBrasil\\Points\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "WebbingBrasil\\Points\\Providers\\PointServiceProvider"
+            ]
+        }
+    }
+}
