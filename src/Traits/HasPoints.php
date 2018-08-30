@@ -1,4 +1,16 @@
 <?php
+/**
+ *  Copyright (c) 2018 Webbing Brasil (http://www.webbingbrasil.com.br)
+ *  All Rights Reserved
+ *
+ *  This file is part of the calculadora-triunfo project.
+ *
+ *  @project calculadora-triunfo
+ *  @file HasPoints.php
+ *  @author Danilo Andrade <danilo@webbingbrasil.com.br>
+ *  @date 13/08/18 at 12:46
+ *  @copyright  Copyright (c) 2018 Webbing Brasil (http://www.webbingbrasil.com.br)
+ */
 
 namespace WebbingBrasil\Points\Traits;
 
@@ -14,61 +26,26 @@ trait HasPoints
         return $this->morphMany(Point::class, 'pointable')->orderBy('created_at', 'desc')->take($amount);
     }
 
-    /**
-     *
-     * @return mix
-     */
-    public function averagePoint($round = null)
+    public function rankPosition()
     {
-        if ($round) {
-            return $this->points()
-                ->selectRaw('ROUND(AVG(amount), ' . $round . ') as averagePointTransaction')
-                ->pluck('averagePointTransaction');
-        }
+        $position = Point::leaderboard($this->getMorphClass(), $this->getKey())->pluck('position')->first();
 
-        return $this->points()
-            ->selectRaw('AVG(amount) as averagePointTransaction')
-            ->pluck('averagePointTransaction');
+        return $position;
+
     }
 
     /**
      *
-     * @return mix
+     * @return double|integer
      */
-    public function countPoint()
+    public function avgPoints()
     {
-        return $this->points()
-            ->selectRaw('count(amount) as countTransactions')
-            ->pluck('countTransactions');
+        return $this->points()->avg('amount');
     }
 
     /**
      *
-     * @return mix
-     */
-    public function sumPoint()
-    {
-        return $this->points()
-            ->selectRaw('SUM(amount) as sumPointTransactions')
-            ->pluck('sumPointTransactions');
-    }
-
-    /**
-     * @param $max
-     *
-     * @return mix
-     */
-    public function pointPercent($max = 5)
-    {
-        $points = $this->points();
-        $quantity = $points->count();
-        $total = $points->selectRaw('SUM(amount) as total')->pluck('total');
-        return ($quantity * $max) > 0 ? $total / (($quantity * $max) / 100) : 0;
-    }
-
-    /**
-     *
-     * @return mix
+     * @return integer
      */
     public function countPoints()
     {
@@ -76,16 +53,37 @@ trait HasPoints
     }
 
     /**
+     *
+     * @return double|integer
+     */
+    public function sumPoints()
+    {
+        return $this->points()->sum('amount');
+    }
+
+    /**
+     * @param $max
+     *
+     * @return double|integer
+     */
+    public function pointPercent($max = 5)
+    {
+        $quantity = $this->countPoints();
+        $total = $this->sumPoints();
+
+        if($quantity == 0 || $max == 0) {
+            return 0;
+        }
+
+        return $total / (($quantity * $max) / 100);
+    }
+
+    /**
      * @return float
      */
     public function currentPoints()
     {
-        $currentPoint = Point::where('pointable_id', $this->getKey())
-            ->where('pointable_type', $this->getMorphClass())
-            ->orderBy('created_at', 'desc')
-            ->take(1)
-            ->pluck('current')
-            ->first();
+        $currentPoint = $this->points(1)->latest()->pluck('current')->first();
 
         if (!$currentPoint) {
             $currentPoint = 0.0;
