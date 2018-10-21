@@ -61,7 +61,8 @@ class Point extends Model
     public static function leaderboard($class = null, $id = null)
     {
         $class = str_replace('\\', '\\\\', $class);
-        $rank = \DB::table(\DB::raw("(SELECT pointable_type, pointable_id, current, @rownum := @rownum + 1 AS position FROM (SELECT p.pointable_type, p.pointable_id, p.current FROM points p GROUP BY p.pointable_type, p.pointable_id, p.current ORDER BY p.current DESC) as t JOIN (SELECT @rownum := 0) r " . (is_null($class) ? '' : "WHERE pointable_type = '{$class}'") . ") v"));
+        $query = "(SELECT pointable_type, pointable_id, current, @rownum := @rownum + 1 AS position FROM (SELECT * FROM (SELECT p.pointable_type, p.pointable_id, max(p.current) current FROM points p GROUP BY p.pointable_type, p.pointable_id) as t " . (is_null($class) ? '' : "WHERE pointable_type = '{$class}'") . " GROUP BY pointable_type, pointable_id ORDER BY current DESC) l JOIN (SELECT @rownum := 0) r ) v";
+        $rank = \DB::table(\DB::raw($query));
 
         if(!is_null($id)) {
             $rank->where('pointable_id', $id);
